@@ -7,6 +7,8 @@ import (
 	"os"
 	"strconv"
 
+	restaurantGin "food_delivery/modules/restaurant/transport/gin"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -33,6 +35,7 @@ func (RestaurantCreate) TableName() string {
 }
 
 type RestaurantUpdate struct {
+	common.SQLModel
 	Name    *string `json:"name" gorm:"column:name;"`
 	Address *string `json:"address" gorm:"column:addr;"`
 }
@@ -66,20 +69,8 @@ func main() {
 	{
 		restaurants := v1.Group("restaurants")
 		{
-			restaurants.POST("", func(ctx *gin.Context) {
-				var newData RestaurantCreate
-				//&newData để xác định vị trí và tăng ID
-				if err := ctx.ShouldBind(&newData); err != nil {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-					return
-				}
 
-				if err := db.Create(&newData).Error; err != nil {
-					ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-					return
-				}
-				ctx.JSON(http.StatusOK, gin.H{"data": newData.Id})
-			})
+			restaurants.POST("", restaurantGin.CreateRestaurant(db))
 
 			restaurants.GET("/:id", func(ctx *gin.Context) {
 				var data Restaurant
