@@ -2,12 +2,10 @@ package main
 
 import (
 	"food_delivery/common"
-	"log"
-	"net/http"
-	"os"
-	"strconv"
-
+	"food_delivery/common/component/appctx"
 	restaurantGin "food_delivery/modules/restaurant/transport/gin"
+	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
@@ -54,115 +52,19 @@ func main() {
 	}
 	log.Println(db)
 	db = db.Debug()
-	// var oldRes Restaurant
-	// //db.Table(oldRes.TableName()).Select("id, name").Where(map[string]interface{}{"id": 3}) // truy vấn nhanh hơn
 
-	// emptyStr := ""
-	// dataUpdate := RestaurantUpdate{
-	// 	Name: &emptyStr, // cần một con trỏ tới string
-	// }
-
-	// db.Exec("select * from")
+	appCtx := appctx.NewAppContext(db)
 
 	r := gin.Default()
 	v1 := r.Group("/v1")
 	{
 		restaurants := v1.Group("restaurants")
 		{
-
-			restaurants.POST("", restaurantGin.CreateRestaurant(db))
-
-			restaurants.GET("/:id", func(ctx *gin.Context) {
-				var data Restaurant
-
-				id, err := strconv.Atoi(ctx.Param("id"))
-				if err != nil {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-					return
-				}
-
-				if err := ctx.ShouldBind(&data); err != nil {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-					return
-				}
-
-				if err := db.Where("id = ?", id).First(&data).Error; err != nil {
-					ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-					return
-				}
-				ctx.JSON(http.StatusOK, gin.H{"data": data})
-			})
-
-			restaurants.PUT("/:id", func(ctx *gin.Context) {
-				id, err := strconv.Atoi(ctx.Param("id"))
-				if err != nil {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-					return
-				}
-
-				var data RestaurantUpdate
-
-				if err := ctx.ShouldBind(&data); err != nil {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-					return
-				}
-
-				if err := db.Where("id = ?", id).Updates(&data).Error; err != nil {
-					ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-					return
-				}
-				ctx.JSON(http.StatusOK, gin.H{"data": "SUCCESS"})
-			})
-
-			restaurants.DELETE("/:id", func(ctx *gin.Context) {
-				id, err := strconv.Atoi(ctx.Param("id"))
-
-				if err != nil {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-					return
-				}
-
-				if err := db.Table(Restaurant{}.TableName()).Where("id = ?", id).Delete(nil).Error; err != nil {
-					ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-					return
-				}
-				ctx.JSON(http.StatusOK, gin.H{"data": "SUCCESS"})
-			})
-
-			restaurants.GET("", func(ctx *gin.Context) {
-				var data []Restaurant
-
-				if err := ctx.ShouldBind(&data); err != nil {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-					return
-				}
-
-				type Paging struct {
-					Page  int `json:"page" format:"page"`
-					Limit int `json:"limit" format:"limit"`
-				}
-				var paging Paging
-				if err := ctx.ShouldBind(&paging); err != nil {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-					return
-				}
-
-				if paging.Page < 1 {
-					paging.Page = 1
-				}
-
-				if paging.Limit < 1 {
-					paging.Limit = 10
-				}
-
-				offset := (paging.Page - 1) * paging.Limit
-
-				if err := db.Offset(offset).Limit(paging.Limit).Order("id desc").Find(&data).Error; err != nil {
-					ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-					return
-				}
-				ctx.JSON(http.StatusOK, gin.H{"data": data})
-			})
+			restaurants.POST("", restaurantGin.CreateRestaurant(appCtx))
+			restaurants.GET("/:id", restaurantGin.GetRestaurant(appCtx))
+			restaurants.PUT("/:id", restaurantGin.UpdateRestaurant(appCtx))
+			restaurants.DELETE("/:id", restaurantGin.DeleteRestaurant(appCtx))
+			restaurants.GET("", restaurantGin.ListRestaurant(appCtx))
 		}
 	}
 

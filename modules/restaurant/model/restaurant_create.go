@@ -1,6 +1,9 @@
 package restaurantModel
 
-import "food_delivery/common"
+import (
+	"food_delivery/common"
+	"strings"
+)
 
 type RestaurantCreate struct {
 	common.SQLModel
@@ -10,4 +13,18 @@ type RestaurantCreate struct {
 
 func (RestaurantCreate) TableName() string {
 	return "restaurants"
+}
+
+func (data *RestaurantCreate) Validate() error {
+	data.Name = strings.TrimSpace(data.Name)
+	if data.Name == "" {
+		return ErrNameCanNotBeEmpty
+	}
+
+	data.Address = strings.TrimSpace(data.Address)
+	if data.Address == "" {
+		return ErrAddressCanNotBeEmpty
+	}
+
+	return nil
 }
