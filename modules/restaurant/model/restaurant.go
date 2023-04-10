@@ -7,8 +7,10 @@ import (
 
 type Restaurant struct {
 	common.SQLModel
-	Name    string `json:"name" gorm:"column:name;"`
-	Address string `json:"address" gorm:"column:addr;"`
+	Name    string         `json:"name" gorm:"column:name;"`
+	Address string         `json:"address" gorm:"column:addr;"`
+	Logo    *common.Image  `json:"logo" gorm:"column:logo;"`
+	Cover   *common.Images `json:"cover" gorm:"column:cover;"`
 }
 
 func (Restaurant) TableName() string {
@@ -16,6 +18,6 @@ func (Restaurant) TableName() string {
 }
 
 var (
-	ErrNameCanNotBeEmpty = errors.New("name can not be empty")
-	ErrAddressCanNotBeEmpty = errors.New("address can not be empty") 
+	ErrNameCanNotBeEmpty    = errors.New("name can not be empty")
+	ErrAddressCanNotBeEmpty = errors.New("address can not be empty")
 )

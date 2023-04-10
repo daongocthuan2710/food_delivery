@@ -4,6 +4,7 @@ import (
 	"food_delivery/common"
 	"food_delivery/common/component/appctx"
 	restaurantGin "food_delivery/modules/restaurant/transport/gin"
+	ginupload "food_delivery/modules/upload/transport/gin"
 	"log"
 	"os"
 
@@ -56,8 +57,10 @@ func main() {
 	appCtx := appctx.NewAppContext(db)
 
 	r := gin.Default()
+	r.Static("/static/", "./static")
 	v1 := r.Group("/v1")
 	{
+		v1.POST("/upload", ginupload.UploadImage(appCtx))
 		restaurants := v1.Group("restaurants")
 		{
 			restaurants.POST("", restaurantGin.CreateRestaurant(appCtx))
