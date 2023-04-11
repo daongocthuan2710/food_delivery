@@ -40,6 +40,8 @@ func UploadImage(appCtx appctx.AppContext) func(ctx *gin.Context) {
 			return
 		}
 
+		img.Fulfill(appCtx.UploadProvider().GetDomain())
+
 		ctx.SaveUploadedFile(fileHeader, fmt.Sprintf("./static/%s", fileHeader.Filename))
 		ctx.JSON(http.StatusOK, gin.H{"data": img})
 		// ctx.JSON(http.StatusOK, gin.H{"url": fmt.Sprintf("http://localhost:8080/static/%s", fileHeader.Filename)})

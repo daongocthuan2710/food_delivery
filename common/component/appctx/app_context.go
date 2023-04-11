@@ -16,8 +16,8 @@ type appContext struct {
 	uploadProvider uploadprovider.UploadProvider
 }
 
-func NewAppContext(db *gorm.DB) *appContext {
-	return &appContext{db: db}
+func NewAppContext(db *gorm.DB, uploadProvider uploadprovider.UploadProvider) *appContext {
+	return &appContext{db: db, uploadProvider: uploadProvider}
 }
 
 func (appCtx *appContext) GetMainDBConnection() *gorm.DB {

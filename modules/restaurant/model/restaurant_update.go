@@ -1,7 +1,7 @@
 package restaurantModel
 
 import (
-	"food_delivery/common"
+	// "food_delivery/common"
 	"strings"
 )
 
@@ -9,7 +9,7 @@ type RestaurantUpdate struct {
 	Name    *string        `json:"name" gorm:"column:name;"`
 	Address *string        `json:"address" gorm:"column:addr;"`
 	Status  *int           `json:"-" gorm:"column:status;"`
-	Cover   *common.Images `json:"cover" gorm:"column:cover;"`
+	// Cover   *common.Images `json:"cover" gorm:"column:cover;"`
 }
 
 func (RestaurantUpdate) TableName() string {

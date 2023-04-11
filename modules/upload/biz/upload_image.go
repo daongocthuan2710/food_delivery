@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"food_delivery/common"
+	"food_delivery/common/component/uploadprovider"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
@@ -16,14 +17,10 @@ import (
 )
 
 type uploadBiz struct {
-	provider UploadProvider
+	provider uploadprovider.UploadProvider
 }
 
-type UploadProvider struct {
-	SaveFileUploaded func(ctx context.Context, data []byte, dst string) (*common.Image, error)
-}
-
-func NewUploadBiz(provider UploadProvider) *uploadBiz {
+func NewUploadBiz(provider uploadprovider.UploadProvider) *uploadBiz {
 	return &uploadBiz{provider: provider}
 }
 
@@ -42,9 +39,9 @@ func (biz *uploadBiz) Upload(ctx context.Context, data []byte, folder, fileName 
 
 	fileExt := filepath.Ext(fileName)
 	fileName = fmt.Sprintf("%d%s", time.Now().UnixNano(), fileExt)
-
+	
 	img, err := biz.provider.SaveFileUploaded(ctx, data, fmt.Sprintf("%s/%s", folder, fileName))
-
+	log.Println(err)
 	if err != nil {
 		return nil, errors.New("cannot save image")
 	}
