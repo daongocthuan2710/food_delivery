@@ -13,21 +13,23 @@ import (
 
 func ListRestaurant(appCtx appctx.AppContext) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
+		go func() {
+			defer common.Recovery()
+			panic(1)
+		}()
+
 		var paging common.Paging
 		if err := ctx.ShouldBind(&paging); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+			panic(common.ErrInvalidRequest(err))
 		}
 
 		var filter restaurantModel.Filter
 		if err := ctx.ShouldBind(&filter); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+			panic(common.ErrInvalidRequest(err))
 		}
 
 		if err := paging.Process(); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+			panic(common.ErrInvalidRequest(err))
 		}
 
 		store := restaurantStorage.NewSqlStore(appCtx.GetMainDBConnection())
@@ -35,10 +37,13 @@ func ListRestaurant(appCtx appctx.AppContext) func(ctx *gin.Context) {
 
 		result, err := biz.ListRestaurant(ctx.Request.Context(), &filter, &paging)
 
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+		for i := range result {
+			result[i].Mask(common.DbTypeRestaurant)
 		}
-		ctx.JSON(http.StatusOK, gin.H{"data": result, "paging": paging})
+
+		if err != nil {
+			panic(err)
+		}
+		ctx.JSON(http.StatusOK, common.NewSuccessResponse(result, paging, filter))
 	}
 }

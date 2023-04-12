@@ -37,11 +37,11 @@ func (biz *deleteNewRestaurantBiz) DeleteRestaurant(ctx context.Context, id int)
 		if err == common.ErrDataNotFound {
 			return errors.New("data not found")
 		}
-		return err
+		return common.ErrCannotGetEntity(restaurantModel.EntityName, err)
 	}
 
 	if olData.Status == 0 {
-		return errors.New("Data has been deleted")
+		return common.ErrEntityDeleted(restaurantModel.EntityName, err)
 	}
 
 	zero := 0
@@ -49,7 +49,7 @@ func (biz *deleteNewRestaurantBiz) DeleteRestaurant(ctx context.Context, id int)
 	if err := biz.store.Update(ctx,
 		map[string]interface{}{"id": id},
 		&restaurantModel.RestaurantUpdate{Status: &zero}); err != nil {
-		return err
+		return common.ErrCannotDeleteEntity(restaurantModel.EntityName, err)
 	}
 
 	return nil

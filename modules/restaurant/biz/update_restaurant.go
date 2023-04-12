@@ -31,16 +31,16 @@ func NewUpdateRestaurantBiz(store UpdateRestaurantStore) *updateNewRestaurantBiz
 
 func (biz *updateNewRestaurantBiz) UpdateRestaurant(ctx context.Context, id int, data *restaurantModel.RestaurantUpdate) error {
 	if err := data.Validate(); err != nil {
-		return err
+		return common.ErrInvalidRequest(err)
 	}
-	
+
 	olData, err := biz.store.FindDataWithCondition(ctx, map[string]interface{}{"id": id})
 
 	if err != nil {
 		if err == common.ErrDataNotFound {
 			return errors.New("data not found")
 		}
-		return err
+		return common.ErrCannotGetEntity(restaurantModel.EntityName, err)
 	}
 
 	if olData.Status == 0 {
@@ -48,7 +48,7 @@ func (biz *updateNewRestaurantBiz) UpdateRestaurant(ctx context.Context, id int,
 	}
 
 	if err := biz.store.Update(ctx, map[string]interface{}{"id": id}, data); err != nil {
-		return err
+		return common.ErrCannotUpdateEntity(restaurantModel.EntityName, err)
 	}
 
 	return nil

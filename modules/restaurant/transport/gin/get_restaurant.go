@@ -1,6 +1,7 @@
 package restaurantGin
 
 import (
+	"food_delivery/common"
 	"food_delivery/common/component/appctx"
 	restaurantBiz "food_delivery/modules/restaurant/biz"
 	restaurantStorage "food_delivery/modules/restaurant/storage"
@@ -27,6 +28,6 @@ func GetRestaurant(appCtx appctx.AppContext) func(ctx *gin.Context) {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, gin.H{"data": data})
+		ctx.JSON(http.StatusOK, common.SimpleSuccessResponse(data))
 	}
 }
