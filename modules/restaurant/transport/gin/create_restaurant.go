@@ -19,6 +19,9 @@ func CreateRestaurant(appCtx appctx.AppContext) func(ctx *gin.Context) {
 			panic(common.ErrInvalidRequest(err))
 		}
 		// Dependencies install
+		u := ctx.MustGet(common.CurrentUser).(common.Requester)
+		newData.OwnerId = u.GetUserId()
+
 		store := restaurantStorage.NewSqlStore(appCtx.GetMainDBConnection())
 		biz := restaurantBiz.NewCreateNewRestaurantBiz(store)
 
